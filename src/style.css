@@ -1,0 +1,143 @@
+body{
+  background : #000000 ;
+}
+div#div_progress_wrapper{
+  width : 100% ;
+  text-align : left ;
+}
+div#div_progress{
+  background : blue ;
+  color : white ;
+}
+div#div_image_canvas_wrapper{
+  display : none ;
+}
+
+table.mandelbrot{
+  width  : <?php echo $w*$nCol+100 ; ?>px ;
+  height : <?php echo $h*$nRow+100 ; ?>px ;
+  margin : auto ;
+  border-collapse : collapse ;
+  border : 0px solid #FF0000 ;
+}
+td.mandelbrot{
+  width  : <?php echo $w ; ?>px ;
+  height : <?php echo $h ; ?>px ;
+}
+canvas{
+  opacity : 1.0 ;
+}
+canvas.palette{
+  border : 1px solid black ;
+}
+table.coords{
+  margin : auto ;
+  text-align : center ;
+}
+td.coords{
+  width : 100px ;
+}
+th.coords{
+  width : 200px ;
+  text-align : right ;
+}
+input.text{
+  width : 100px ;
+}
+th.coords, td.coords{
+  font-size : 14pt ;
+  font-weight : bold ;
+  font-family : arial , sans-serif ;
+  padding-left  : 1em ;
+  padding-right : 1em ;
+}
+
+table#table_palette{
+  width : 600px ;
+  margin : auto ;
+}
+img.img_palette{
+  width : 300px ;
+}
+table#table_history{
+  width : 750px ;
+  margin : auto ;
+}
+tr.history{
+  border-bottom : 1px solid black ;
+}
+td.history_thumbnail{
+  width : 104px ;
+  height : 104px ;
+  text-align : center ;
+  vertical-align : middle ;
+  font-size : 24pt ;
+}
+img.history{
+  margin : 2px ;
+}
+
+table#table_progress{
+  border : 1px solid black ;
+}
+td#td_progress_number{
+  width : 150px ;
+  text-align : center ;
+  background : black ;
+  color : white ;
+}
+td#td_progress_bar{
+  width : 600px ;
+}
+
+input.history{
+  font : 20pt arial ;
+}
+
+div.tab{ display : table ;}
+div.tab_cell{ display : table-cell ; }
+
+input#submit_generate_julia, input#submit_change_settings, input#submit_centre, input#submit_generate_special_image{
+  font : 12pt arial ;
+  width : 200px ;
+}
+canvas#canvas_julia_preview{
+  margin : auto ;
+  display : inline ;
+}
+
+canvas#canvas_explorer{
+  border : 1px solid black ;
+  margin : auto ;
+}
+
+p#p_special_image{
+  text-align : center ;
+}
+p#p_special_image, select, input#input_custom_image_width, input#input_custom_image_height, input#submit_add_to_gallery{
+  font : 12pt arial , sans-serif ;
+}
+input#input_custom_image_width, input#input_custom_image_height{
+  width : 2em ;
+}
+
+canvas.gallery{
+  border : 1px solid black ;
+  margin : 2px ;
+}
+td.gallery{
+  width : 104px ;
+  height : 104px ;
+}
+
+
+canvas#canvas_palette_scalingPower, canvas#canvas_palette_periodicity, canvas#canvas_palette_preview{
+  border : 1px solid black ;
+  margin : auto ;
+}
+
+th.palette_settings{
+  width : 150px ;
+}
+span#span_palette_wait{
+}
