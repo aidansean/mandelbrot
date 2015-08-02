@@ -81,13 +81,19 @@ table#table_progress{
   border : 1px solid black ;
 }
 td#td_progress_number{
-  width : 150px ;
+  width : 200px ;
   text-align : center ;
   background : black ;
   color : white ;
+  font : 12pt arial , sans-serif ;
 }
 td#td_progress_bar{
-  width : 600px ;
+  width : 550px ;
+  vertical-align : middle ;
+  padding-top : 5px ;
+}
+canvas#canvas_progress{
+  margin : 0px ;
 }
 
 input.history{

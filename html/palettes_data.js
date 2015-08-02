@@ -158,3 +158,11 @@ palette_tmp.add_color_stop(new color_stop_object(0.6  , 255,   0, 255)) ;
 palette_tmp.add_color_stop(new color_stop_object(0.999, 255, 255,   0)) ;
 palette_tmp.add_color_stop(new color_stop_object(1.0  ,   0,   0,   0)) ;
 palettes.push(palette_tmp) ;
+
+
+palettes.push(random_palette('Random 1', 1)) ;
+palettes.push(random_palette('Random 2', 2)) ;
+palettes.push(random_palette('Random 3', 3)) ;
+palettes.push(random_palette('Random 4', 4)) ;
+
+

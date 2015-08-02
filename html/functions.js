@@ -43,6 +43,7 @@ function pixel_object(x0, y0, u, v){
   this.d2_down = 1e6 ;
   this.d2_up   = 1e6 ;
   this.antialiasNIterations = 1 ;
+  this.stripeAverageNIterations = 1 ;
   this.reset_coords = function(x0, y0, u, v, preserveDone){
     this.x0 = x0 ;
     this.y0 = y0 ;
@@ -55,12 +56,14 @@ function pixel_object(x0, y0, u, v){
   }
   this.set_color = function(Vars){
     var iterations = (Vars['antialias']) ? this.antialiasNIterations : this.nIterations ;
+    if(Vars['stripeAverage'].value) iterations = this.stripeAverageNIterations ;
     var f = (iterations-Vars['iMin'].value)/(Vars['iMax'].value-Vars['iMin'].value) ;
     this.color = get_color(f, Vars, false) ;
     return ;
   }
   this.set_rgb = function(Vars){
     var iterations = (Vars['antialias']) ? this.antialiasNIterations : this.nIterations ;
+    if(Vars['stripeAverage'].value) iterations = this.stripeAverageNIterations ;
     if(this.d) iterations = this.nIterations + this.d/100 ;
     
     var f = (iterations-Vars['iMin'].value)/(Vars['iMax'].value-Vars['iMin'].value) ;
@@ -102,17 +105,17 @@ function iterate_pixel(pixel, Vars){
     y0 = Vars['Jy'].value ;
   }
   var i = 0 ;
+  var sps = [] ;
+  var points = [] ;
   switch(Vars['mode'].value){
   case 2:
-    if(i==0){
-	  var fail = false ;
-	  var q = (x0-0.25)*(x0-0.25)+y0*y0 ;
-	  if(q*(q+x0-0.25)<0.25*y0*y0  ) fail = true ; // Main cardioid
-	  if(((x0+1)*(x0+1)+y0*y0)*16<1) fail = true ; // Second bulb
-	  if(fail){
-	    i = Vars['iMax'].value ;
-	    break ;
-	  }
+	var fail = false ;
+	var q = (x0-0.25)*(x0-0.25)+y0*y0 ;
+	if(q*(q+x0-0.25)<0.25*y0*y0  ) fail = true ; // Main cardioid
+	if(((x0+1)*(x0+1)+y0*y0)*16<1) fail = true ; // Second bulb
+	if(fail){
+	  i = Vars['iMax'].value ;
+	  break ;
 	}
   case 1:
     for(; i<Vars['iMax'].value ; i++){
@@ -120,7 +123,9 @@ function iterate_pixel(pixel, Vars){
       y2 = y0 + 2*x1*y1       ;
       x1 = x2 ;
       y1 = y2 ;
-      if(sqrt(x2*x2+y2*y2)>2e6){
+      sps.push(0.5*(1+sin(V['stripeDensity'].value*atan2(y1, x1)/pow(2,i)))) ;
+      if(sps.length>20) sps.splice(0,1) ;
+      if(sqrt(x2*x2+y2*y2)>V['bailout'].value){
         pixel.done = true ;
         break ;
       }
@@ -131,7 +136,7 @@ function iterate_pixel(pixel, Vars){
     for(; i<Vars['iMax'].value ; i++){
       x2 = x0 + x1*x1 - y1*y1 + x1 ;
       y2 = y0 + 2*x1*y1       + y1 ;
-      if(sqrt(x2*x2+y2*y2)>2e6){
+      if(sqrt(x2*x2+y2*y2)>V['bailout'].value){
         pixel.done = true ;
         break ;
       }
@@ -144,20 +149,14 @@ function iterate_pixel(pixel, Vars){
     var Jx = Vars['Jx'].value ;
     var Jy = Vars['Jy'].value ;
     for(; i<Vars['iMax'].value ; i++){
-      if(true){
-        var e1 = Math.exp( y1+Jy) ;
-        var e2 = Math.exp(-y1-Jy) ;
-        x2 = Math.sin(x1+Jx)*0.5*(e1+e2) ;
-        y2 = Math.cos(x1+Jx)*0.5*(e1-e2) ;
-      }
-      else{
-        var e1 = Math.exp( y1) ;
-        var e2 = Math.exp(-y1) ;
-        x2 = Math.sin(x1)*0.5*(e1+e2) + Jx ;
-        y2 = Math.cos(x1)*0.5*(e1-e2) + Jy ;
-      }
-      d = Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) ;
-      if(d<1e-8){
+      var e1 = exp( y1) ;
+      var e2 = exp(-y1) ;
+      var x3 = sin(x1)*0.5*(e1+e2) ;
+      var y3 = cos(x1)*0.5*(e1-e2) ;
+      x2 = Jx*x3 - Jy*y3 ;
+      y2 = Jx*y3 + Jy*x3 ;
+      d = sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2)) ;
+      if(abs(y2)>500){
         pixel.done = true ;
         pixel.d = d ;
         break ;
@@ -165,6 +164,7 @@ function iterate_pixel(pixel, Vars){
       x1 = x2 ;
       y1 = y2 ;
     }
+    
     pixel.d = d ;
     break ;
   case 3:
@@ -173,19 +173,68 @@ function iterate_pixel(pixel, Vars){
       y2 = y0 - y1*y1*y1 + 3*x1*x1*y1 ;
       x1 = x2 ;
       y1 = y2 ;
-      if(sqrt(x2*x2+y2*y2)>2e6){
+      if(sqrt(x2*x2+y2*y2)>V['bailout'].value){
         pixel.done = true ;
         break ;
       }
+    }
+    break ;
+  case 999: // z -> z^(1.99) + c
+    for(; i<Vars['iMax'].value ; i++){
+      var p = 9.0 ;
+      var r = sqrt(x1*x1+y1*y1) ;
+      var t = atan2(y1,x1) ;
+      r = pow(r,p) ;
+      t = p*t ;
+      x2 = r*cos(t) + x0 ;
+      y2 = r*sin(t) + y0 ;
+      if(sqrt(x2*x2+y2*y2)>V['bailout'].value){
+        pixel.done = true ;
+        break ;
+      }
+      x1 = x2 ;
+      y1 = y2 ;
     }
     break ;
   }
   pixel.x = x1 ;
   pixel.y = y1 ;
   pixel.nIterations = i ;
-  var modZ = Math.sqrt(pixel.x*pixel.x+pixel.y*pixel.y) ;
-  var nu = Math.log(Math.log(modZ)/Math.log(2))/Math.log(2) ;
-  pixel.antialiasNIterations = (i>=Vars['iMax'].value) ? pixel.nIterations : pixel.nIterations+1-nu ;
+  var modZ = sqrt(pixel.x*pixel.x+pixel.y*pixel.y) ;
+  var nu = log(log(modZ)/log(V['bailout'].value))/log(V['bailout'].value) ;
+  var iMax = Vars['iMax'].value ;
+  pixel.antialiasNIterations = (i>=iMax) ? pixel.nIterations : pixel.nIterations+1-nu ;
+  
+  var stripeParameter = 0 ;
+  for(var i=0 ; i<sps.length-3 ; ++i){ stripeParameter += sps[i] ; }
+  stripeParameter /= (sps.length-3) ;
+  var offset = 1 ;
+  var d  = 1-nu ;
+  stripeParameter = d*sps[sps.length-offset-1] + (1-d)*sps[sps.length-offset-2] ;
+  
+  // Use splines!
+  if(sps.length>=7 && false){
+    var S = [] ;
+    var n = 10 ;
+    for(var j=0 ; j<4 ; ++j){
+      S.push(0) ;
+      for(var k=0 ; k<n ; ++k){
+        S[j] += sps[sps.length-1-j-k] ;
+      }
+    }
+    
+    // Reticulating splines
+    var d2 = pow(d,2) ;
+    var d3 = pow(d,3) ;
+    var H = [] ;
+    H.push(0.5*(    -d2+  d3)) ;
+    H.push(0.5*( d+4*d2-3*d3)) ;
+    H.push(0.5*( 2-5*d2+3*d3)) ;
+    H.push(0.5*(-d+2*d2-  d3)) ;
+    
+    stripeParameter = H[0]*S[0] + H[1]*S[1] + H[2]*S[2] + H[3]*S[3] ;
+  }
+  pixel.stripeAverageNIterations = iMax*stripeParameter/pixel.nIterations ;
 }
 
 function start(){
@@ -231,6 +280,20 @@ function start(){
   data_fractal      = dataImage_fractal.data ;
   data_fractal[3] = 1 ;
   
+  add_eventListeners() ;
+  
+  draw_palette_preview() ;
+  draw_palette_scalingPower() ;
+  draw_palette_periodicity() ;
+  make_palette_table() ;
+
+  update_all() ;
+  
+  prepare_gallery_table() ;
+  draw_next_gallery_fractal() ;
+}
+
+function add_eventListeners(){
   document.addEventListener('keydown', keyDown, false) ;
   Get('submit_change_settings').addEventListener('click', change_settings, false) ;
   Get('submit_generate_julia' ).addEventListener('click', generate_julia , false) ;
@@ -257,16 +320,6 @@ function start(){
   for(var key in V){
     if(Get('input_'+key)) Get('input_'+key).addEventListener('change', check_variable_change, false) ;
   }
-  
-  draw_palette_preview() ;
-  draw_palette_scalingPower() ;
-  draw_palette_periodicity() ;
-  make_palette_table() ;
-
-  update_all() ;
-  
-  prepare_gallery_table() ;
-  draw_next_gallery_fractal() ;
 }
 
 function draw_next_gallery_fractal(){
@@ -296,6 +349,7 @@ function update_all(){
   update_coords_table() ;
   update_url() ;
   update_fraction() ;
+  redraw_palette() ;
   update_canvae() ;
   update_history() ;
   update_julia_preview() ;
@@ -323,10 +377,10 @@ function update_canvae_stage(preserveDone){
   var size = Math.pow(3,nStages-stage) ;
   var offset = 0.5*(size-1) ;
   
-  for(var u=offset ; u<w ; u+=size){
-    var x = V['Cx'].value - 0.5*V['Dr'].value + DX*u/w ;
-    for(var v=offset ; v<h ; v+=size){
-      var y = V['Cy'].value - 0.5*V['Dr'].value + DY*v/h ;
+  for(var v=offset ; v<h ; v+=size){
+    var y = V['Cy'].value - 0.5*V['Dr'].value + DY*v/h ;
+    for(var u=offset ; u<w ; u+=size){
+      var x = V['Cx'].value - 0.5*V['Dr'].value + DX*u/w ;
       var p = pixels[u][v] ;
       p.reset_coords(x,y,u,v,preserveDone) ;
       pixel_queue.push(p) ;
@@ -387,7 +441,7 @@ function fill_progress_bar(fraction){
   context_progress.fillStyle = get_color(0, V, false) ;
   context_progress.fillRect(0, 0, width, height) ;
   context_progress.fillStyle = 'rgb(0,0,255)' ;
-  context_progress.fillRect(0, 0, fraction*width, 50) ;
+  context_progress.fillRect(0, 0, fraction*width, height) ;
 }
 
 function toggle_description(){
@@ -413,10 +467,11 @@ function update_julia_preview(){
     VJP['Jx'].value = V['Cx'].value ;
     VJP['Jy'].value = V['Cy'].value ;
   }
+  var Dr = VJP['Dr'].value ;
   for(var i=0 ; i<w ; ++i){
-    var x = -2 + 4*i/w ;
+    var x = VJP['Cx'].value-0.5*Dr + Dr*i/w ;
     for(var j=0 ; j<h ; ++j){
-      var y = -2 + 4*j/h ;
+      var y = VJP['Cy'].value-0.5*Dr + Dr*j/h ;
       p.reset_coords(x, y, i, j, false) ;
       iterate_pixel(p, VJP) ;
       var f = p.nIterations/255.0 ;
@@ -424,6 +479,14 @@ function update_julia_preview(){
       jContext.fillStyle = color ;
       jContext.fillRect(i,j,1,1) ;
     }
+  }
+  if(VJP['mode'].value==2){
+    var u = Math.round(w*(0.5 + (V['Jx'].value-VJP['Cx'].value)/VJP['Dr'].value)) ;
+    var v = Math.round(h*(0.5 + (V['Jy'].value-VJP['Cy'].value)/VJP['Dr'].value)) ;
+    jContext.beginPath() ;
+    jContext.arc(u, v, 10, 0, 2*pi(), true) ;
+    jContext.strokeStyle = 'rgb(255,255,255)' ;
+    jContext.stroke() ;
   }
 }
 function update_canvae(){
@@ -492,7 +555,12 @@ function generate_julia(){
   V['Cy'].value = 0.0 ;
   
   if(V['mode'].value==2) V['mode'].value = 1 ;
+  VJuliaPreview['mode'].value = 2 ;
+  VJuliaPreview['Cx'  ].value = -0.8 ;
+  VJuliaPreview['Cy'  ].value =  0.0 ;
+  VJuliaPreview['Dr'  ].value =  3.0 ;
   update_all() ;
+  Get('submit_generate_julia').style.display = 'none' ;
 }
 function centre_00(){
   V['Cx'].value = 0 ;
@@ -593,4 +661,3 @@ function process_special_image(){
 function finish_special_image(){
   Get('img_special_image').src = canvas_special_image.toDataURL() ;
 }
-

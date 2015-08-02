@@ -10,6 +10,10 @@ function history_item(){
       V[key].value = this.V[key] ;
     }
     update_all() ;
+    if(V['mode'].value==2){
+      Get('submit_generate_julia').style.display = '' ;
+      VJuliaPreview['mode'].value = 1 ;
+    }
   }
   this.url = function(){
     string = '' ;

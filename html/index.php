@@ -3,16 +3,16 @@
 $title = 'Fractals on the canvas' ;
 
 $js_scripts = array() ;
-$js_scripts[] = 'helper.js'    ;
-$js_scripts[] = 'big.js'       ;
-$js_scripts[] = 'variables.js' ;
-$js_scripts[] = 'palettes.js'  ;
+$js_scripts[] = 'helper.js'         ;
+$js_scripts[] = 'variables.js'      ;
+$js_scripts[] = 'palettes.js'       ;
 $js_scripts[] = 'palettes_data.js'  ;
-$js_scripts[] = 'history.js'   ;
-$js_scripts[] = 'controls.js'  ;
-$js_scripts[] = 'functions.js' ;
-$js_scripts[] = 'gallery.js'   ;
-$js_scripts[] = 'gallery_data.php' ;
+$js_scripts[] = 'algorithms.js'     ;
+$js_scripts[] = 'history.js'        ;
+$js_scripts[] = 'controls.js'       ;
+$js_scripts[] = 'functions.js'      ;
+$js_scripts[] = 'gallery.js'        ;
+$js_scripts[] = 'gallery_data.php'  ;
 $stylesheets = array() ;
 $stylesheets[] = 'style.css' ;
 
@@ -59,11 +59,10 @@ echo '</script>' , PHP_EOL ;
         <tbody>
           <tr>
             <td id="td_progress_number">
-              <span id="span_progress_percent"></span><br />
-              <span id="span_progress_fraction"></span>
+              <span id="span_progress_percent"></span> <span id="span_progress_fraction"></span>
             </td>
             <td id="td_progress_bar">
-              <canvas id="canvas_progress" width="600" height="50"></canvas>
+              <canvas id="canvas_progress" width="550" height="20"></canvas>
             </td>
           </tr>
         </tbody>
@@ -199,6 +198,11 @@ echo '</script>' , PHP_EOL ;
           <option value="800x600">Desktop wallpaper (800 x 600 pixels)</option>
           <option value="640x480">Desktop wallpaper (640 x 480 pixels)</option>
           <option value="640x480">Desktop wallpaper (640 x 480 pixels)</option>
+          <option value="2481x3510">A4 paper @ 300 dpi (2481 x 3510 pixels)</option>
+          <option value="3510x4950">A3 paper @ 300 dpi (3510 x 4950 pixels)</option>
+          <option value="4950x7020">A2 paper @ 300 dpi (4590 x 7020 pixels)</option>
+          <option value="7020x9930">A1 paper @ 300 dpi (7020 x 9930 pixels)</option>
+          <option value="9930x14040">A0 paper @ 300 dpi (9930 x 14040 pixels)</option>
           <option value="100x100">Icon (100 x 100 pixels)</option>
         </select>
         <br />
@@ -211,6 +215,7 @@ echo '</script>' , PHP_EOL ;
       <canvas id="canvas_special_image" style="display:none"></canvas>
       <canvas id="canvas_special_image_progress" style="display:none"></canvas>
       <p class="center"><img id="img_special_image" width="10px" height="10px"/></p>
+    </div>
     </div>
     
     <div class="right">

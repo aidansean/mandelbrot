@@ -1,14 +1,11 @@
 <?php
 
 // Turn on error reporting
-ini_set('display_startup_errors',1) ;
-ini_set('display_errors',1) ;
-error_reporting(-1) ;
+//ini_set('display_startup_errors',1) ;
+//ini_set('display_errors',1) ;
+//error_reporting(-1) ;
 
-$mysql_username = 'dice' ;
-$mysql_password = 'scores'   ;
-$mysql_database = 'aidansean' ;
-$mysql_prefix   = '' ;
+include_once('mysql.php') ;
 
 // Connect to database
 $mySQL_connection = mysql_connect('localhost', $mysql_username, $mysql_password) or die('Could not connect: ' . mysql_error()) ;

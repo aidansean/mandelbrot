@@ -48,6 +48,11 @@ V['iMax'] = new variable_object('iMax', 255, true, true ) ;
 V['mode'] = new variable_object('mode',   2, true, true) ;
 V['antialias'] = new variable_object('antialias', 1, true, true) ;
 
+V['bailout'] = new variable_object('bailout', 1e20, true, true) ;
+
+V['stripeAverage'] = new variable_object('stripeAverage', false, true, true) ;
+V['stripeDensity'] = new variable_object('stripeDensity', 1, true, true) ;
+
 V['palette'             ] = new variable_object('palette'             , 0, false, false) ;
 V['palette_scalingPower'] = new variable_object('palette_scalingPower', 1, true , false) ;
 V['palette_periodicity' ] = new variable_object('palette_periodicity' , 1, true , false) ;
@@ -59,6 +64,9 @@ VJuliaPreview['h'].value = 200 ;
 VJuliaPreview['Jx'].value = V['Cx'].value ;
 VJuliaPreview['Jy'].value = V['Cy'].value ;
 VJuliaPreview['mode'].value = 1 ;
+VJuliaPreview['Cx'].value = 0.0 ;
+VJuliaPreview['Cy'].value = 0.0 ;
+VJuliaPreview['Dr'].value = 4.0 ;
 
 var DX = V['Dr'].value ;
 var DY = V['Dr'].value ;

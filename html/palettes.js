@@ -21,6 +21,25 @@ function color_stop_object(fraction, red, green, blue){
   this.g = green ;
   this.b = blue ;
 }
+function random_color_stop(option){
+  var f = (option==0 || option==1) ? option : Math.random() ;
+  var r = Math.round(255*Math.random()) ;
+  var g = Math.round(255*Math.random()) ;
+  var b = Math.round(255*Math.random()) ;
+  return new color_stop_object(f, r, g, b) ;
+}
+function random_palette(name, nStops){
+  var stops = [] ;
+  for(var i=0 ; i<nStops ; ++i){
+    stops.push(new random_color_stop()) ;
+  }
+  stops.sort( function(a,b){ return a.f - b.f ; } ) ;
+  var palette = new palette_object(name) ;
+  palette.add_color_stop(new random_color_stop(0)) ;
+  for(var i=0 ; i<stops.length ; ++i){ palette.add_color_stop(stops[i]) ; }
+  palette.add_color_stop(new random_color_stop(1)) ;
+  return palette ;
+}
 function palette_object(name){
   this.name = name ;
   this.canvas  = null ;
@@ -78,7 +97,7 @@ function update_palette(e){
   update_url() ;
   update_history() ;
   redraw_pixels() ;
-  fill_progress_bar(1) ;
+  redraw_palette() ;
 }
 
 function draw_palette_preview(){
@@ -87,13 +106,12 @@ function draw_palette_preview(){
   var width  = canvas.width  ;
   var height = canvas.height ;
   var df = 1/width ;
-  var palette = palettes[V['palette'].value] ;
   context.fillStyle = get_color(0, V, false) ;
   context.fillRect(0, 0, width, height) ;
   var fraction = 1.0 ;
   for(var f=0 ; f<fraction ; f+=df){
     context.fillStyle = get_color(f, V) ;
-    context.fillRect(f*width, 0, Math.max(1,df), 50) ;
+    context.fillRect(f*width, 0, Math.max(1,df), height) ;
   }
 }
 function draw_palette_scalingPower(){
@@ -175,12 +193,15 @@ function mouseup_canvas_palette_scalingPower(e){
   if(palette_scalingPower_active==false) return ;
   palette_scalingPower_active = false ;
   mouse_canvas_palette_scalingPower_update(e) ;
-  draw_palette_scalingPower() ;
   update_coords_table() ;
   redraw_pixels() ;
 }
 
-
+function redraw_palette(){
+  draw_palette_scalingPower() ;
+  draw_palette_periodicity() ;
+  draw_palette_preview() ;
+}
 
 function draw_palette_periodicity(){
   var canvas = Get('canvas_palette_periodicity') ;

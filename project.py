@@ -3,9 +3,13 @@ from project_module import project_object, image_object, link_object, challenge_
 p = project_object('mandelbrot', 'Mandelbrot explorer')
 p.domain = 'http://www.aidansean.com/'
 p.path = 'mandelbrot'
-p.preview_image_ = image_object('http://placekitten.com.s3.amazonaws.com/homepage-samples/408/287.jpg', 408, 287)
+p.preview_image    = image_object('%s/images/project.jpg'   %p.path, 150, 250)
+p.preview_image_bw = image_object('%s/images/project_bw.jpg'%p.path, 150, 250)
+p.folder_name = 'aidansean'
 p.github_repo_name = 'mandelbrot'
 p.mathjax = True
+p.tags = 'Maths'
+p.technologies = 'AJAX,CSS,HTML,JavaScript,MySQL,PHP'
 p.links.append(link_object(p.domain, 'mandelbrot/', 'Live page'))
 p.introduction = 'This project estimates the Mandelbrot set using the HTML5 canvas.  It\'s one of my longest running projects that has been implemented in PHP, SVG, HTML5 canvas, HTML tables, and even in ROOT.'
 p.overview = '''This projects presents a wide range of different challenges.  The aim is to create a fractal browser that pushes the operating environment to the limit in terms of performance, while still being user friendly and responsive.  In its current iteration the user clicks on the region of the fractal they wish to explore and the project zooms in to that region.  The user can change the way the fractal is coloured by changing the palette its properties.  They can also move from the Mandelbrot set to the corresponding Julia set.  There is also the option to explore the cubic Mandelbrot set.  Past iterations have included even more fractals, including Newton iterations and generalised Julia sets.  However these have been removed in this iteration as they should be refactored into a separate fractal class rather than inserted by hand.'''
